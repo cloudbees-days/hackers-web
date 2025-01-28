@@ -26,6 +26,7 @@
 <script>
 import axios from 'axios'
 import ListItem from '../components/ListItem'
+import { getConfig } from '../config'
 
 export default {
   components: { ListItem },
@@ -36,7 +37,7 @@ export default {
   },
   async created () {
     try {
-      const apiUrl = process.env.VUE_APP_HN_API_URL || 'https://hn-api.preview.cb-demos.io/api'
+      const { apiUrl } = getConfig()
       let response = await axios.get(`${apiUrl}/stories/ask`)
       this.posts = response.data.map(story => ({
         id: story.id,

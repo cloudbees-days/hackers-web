@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/vue";
 import Hot from "@/views/Hot.vue";
 import axios from "axios";
+import { getConfig } from "@/config";
 
 // Mock axios
 jest.mock("axios");
@@ -30,61 +31,53 @@ jest.mock("@/components/ListItem.vue", () => ({
 }));
 
 describe("Hot.vue", () => {
+  const { apiUrl } = getConfig();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const mockTopStories = [1, 2, 3];
-  const mockStoryDetails = [
+  const mockStories = [
     {
       id: 1,
       title: "First Story",
       url: "https://example.com/1",
-      score: 100,
-      by: "user1",
-      descendants: 50,
+      points: 100,
+      submitted_by: "user1",
+      comments: 50,
+      comments_url: "https://example.com/comments/1"
     },
     {
       id: 2,
       title: "Second Story",
       url: "https://example.com/2",
-      score: 200,
-      by: "user2",
-      descendants: 75,
+      points: 200,
+      submitted_by: "user2",
+      comments: 75,
+      comments_url: "https://example.com/comments/2"
     },
     {
       id: 3,
       title: "Third Story",
       url: "https://example.com/3",
-      score: 300,
-      by: "user3",
-      descendants: 25,
+      points: 300,
+      submitted_by: "user3",
+      comments: 25,
+      comments_url: "https://example.com/comments/3"
     },
   ];
 
   it("renders the page title correctly", async () => {
     // Mock successful responses
-    axios.get.mockImplementation((url) => {
-      if (url.includes("topstories")) {
-        return Promise.resolve({ data: [] });
-      }
-      return Promise.resolve({ data: {} });
-    });
+    axios.get.mockResolvedValue({ data: [] });
 
     const { getByText } = render(Hot);
     expect(getByText("Hot posts")).toBeTruthy();
   });
 
   it("fetches and displays posts correctly", async () => {
-    // Mock the API calls
-    axios.get.mockImplementation((url) => {
-      if (url.includes("topstories")) {
-        return Promise.resolve({ data: mockTopStories });
-      }
-      const storyId = parseInt(url.split("/").pop().split(".")[0]);
-      const story = mockStoryDetails.find((s) => s.id === storyId);
-      return Promise.resolve({ data: story });
-    });
+    // Mock the API call
+    axios.get.mockResolvedValue({ data: mockStories });
 
     const { findAllByTestId, findByText } = render(Hot);
 
@@ -97,74 +90,31 @@ describe("Hot.vue", () => {
     expect(await findByText("by user1")).toBeTruthy();
 
     // Verify that API was called correctly
-    expect(axios.get).toHaveBeenCalledWith(
-      "https://hacker-news.firebaseio.com/v0/topstories.json",
-    );
-    mockTopStories.forEach((id) => {
-      expect(axios.get).toHaveBeenCalledWith(
-        `https://hacker-news.firebaseio.com/v0/item/${id}.json`,
-      );
-    });
+    expect(axios.get).toHaveBeenCalledWith(`${apiUrl}/stories/top`);
   });
 
   it("renders empty state when API fails", async () => {
     // Mock failed API call
-    axios.get.mockRejectedValueOnce(new Error("API Error"));
+    axios.get.mockRejectedValue(new Error("API Error"));
 
     const { container } = render(Hot);
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Verify only the container and title are rendered
-    expect(
-      container.querySelectorAll('[data-testid="list-item"]'),
-    ).toHaveLength(0);
-  });
-
-  it("limits the number of posts to 20", async () => {
-    // Create array of 30 story IDs
-    const manyStories = Array.from({ length: 30 }, (_, i) => i + 1);
-
-    // Mock the API calls
-    axios.get
-      .mockImplementationOnce(() => Promise.resolve({ data: manyStories }))
-      .mockImplementation((url) => {
-        const storyId = parseInt(url.split("/").pop().split(".")[0]);
-        return Promise.resolve({
-          data: {
-            id: storyId,
-            title: `Story ${storyId}`,
-            url: `https://example.com/${storyId}`,
-            score: 100,
-            by: `user${storyId}`,
-            descendants: 50,
-          },
-        });
-      });
-
-    const { findAllByTestId } = render(Hot);
-
-    // Wait for all list items and verify max 20 are displayed
-    const items = await findAllByTestId("list-item");
-    expect(items.length).toBeLessThanOrEqual(20);
-
-    // Verify API calls
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(axios.get).toHaveBeenCalledTimes(21); // 1 for topstories + 20 for individual stories
+    expect(container.querySelectorAll('[data-testid="list-item"]')).toHaveLength(0);
   });
 
   it("handles posts without URLs gracefully", async () => {
     const storyWithoutUrl = {
       id: 1,
       title: "Story without URL",
-      score: 100,
-      by: "user1",
-      descendants: 50,
-      // url is intentionally missing
+      points: 100,
+      submitted_by: "user1",
+      comments: 50,
+      comments_url: "https://example.com/comments/1"
     };
 
-    axios.get
-      .mockImplementationOnce(() => Promise.resolve({ data: [1] }))
-      .mockImplementationOnce(() => Promise.resolve({ data: storyWithoutUrl }));
+    axios.get.mockResolvedValue({ data: [storyWithoutUrl] });
 
     const { findByText } = render(Hot);
 
