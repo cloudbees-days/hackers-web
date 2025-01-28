@@ -2,6 +2,10 @@ import { render, fireEvent } from "@testing-library/vue";
 import Login from "@/views/Login.vue";
 import Vuex from "vuex";
 import Vue from "vue";
+import axios from 'axios';
+
+// Mock axios
+jest.mock('axios');
 
 // Set up Vue to use Vuex
 Vue.use(Vuex);
@@ -11,6 +15,10 @@ describe("Login.vue", () => {
   let actions;
 
   beforeEach(() => {
+    // Reset axios mock
+    axios.get.mockReset();
+    axios.post.mockReset();
+
     // Set up Vuex store with mock login action
     actions = {
       login: jest.fn(),
@@ -18,6 +26,14 @@ describe("Login.vue", () => {
 
     store = new Vuex.Store({
       actions,
+    });
+
+    // Mock successful users fetch by default
+    axios.get.mockResolvedValue({
+      data: [
+        { username: 'testuser1', password: 'pass1' },
+        { username: 'testuser2', password: 'pass2' }
+      ]
     });
   });
 
@@ -27,7 +43,7 @@ describe("Login.vue", () => {
     });
   };
 
-  it("renders login form correctly", () => {
+  it("renders login form correctly", async () => {
     const { getByText, getByLabelText, getByRole } = renderLogin();
 
     // Check title and form elements
@@ -37,11 +53,20 @@ describe("Login.vue", () => {
     expect(getByRole("button", { name: "Login" })).toBeTruthy();
   });
 
-  it("shows helper links for test accounts", () => {
-    const { getByText } = renderLogin();
+  it("shows available users from auth service", async () => {
+    const { findByText } = renderLogin();
 
-    expect(getByText("Normal user: normaluser/normaluser")).toBeTruthy();
-    expect(getByText("Beta user: betauser/betauser")).toBeTruthy();
+    // Wait for the users to be loaded and displayed
+    expect(await findByText("testuser1/pass1")).toBeTruthy();
+    expect(await findByText("testuser2/pass2")).toBeTruthy();
+  });
+
+  it("shows error when auth service is unavailable", async () => {
+    axios.get.mockRejectedValue(new Error('Network error'));
+
+    const { findByText } = renderLogin();
+
+    expect(await findByText("Auth Service Currently Unavailable")).toBeTruthy();
   });
 
   it("allows user input in form fields", async () => {
@@ -74,22 +99,15 @@ describe("Login.vue", () => {
     });
   });
 
-  it("fills in normal user credentials when helper link is clicked", async () => {
-    const { getByText, getByLabelText } = renderLogin();
+  it("fills in user credentials when helper link is clicked", async () => {
+    const { findByText, getByLabelText } = renderLogin();
 
-    await fireEvent.click(getByText("Normal user: normaluser/normaluser"));
+    // Wait for and click the first user link
+    const userLink = await findByText("testuser1/pass1");
+    await fireEvent.click(userLink);
 
-    expect(getByLabelText("Username").value).toBe("normaluser");
-    expect(getByLabelText("Password").value).toBe("normaluser");
-  });
-
-  it("fills in beta user credentials when helper link is clicked", async () => {
-    const { getByText, getByLabelText } = renderLogin();
-
-    await fireEvent.click(getByText("Beta user: betauser/betauser"));
-
-    expect(getByLabelText("Username").value).toBe("betauser");
-    expect(getByLabelText("Password").value).toBe("betauser");
+    expect(getByLabelText("Username").value).toBe("testuser1");
+    expect(getByLabelText("Password").value).toBe("pass1");
   });
 
   it("requires username and password fields", () => {
@@ -119,5 +137,24 @@ describe("Login.vue", () => {
     form.dispatchEvent(submitEvent);
 
     expect(preventDefault).toHaveBeenCalled();
+  });
+
+  it("shows loading state while fetching users", async () => {
+    axios.get.mockImplementation(() => new Promise(() => { })); // Never resolves
+
+    const { getByText } = renderLogin();
+    expect(getByText("Loading available users...")).toBeTruthy();
+  });
+
+  it("shows retry button when users fetch fails", async () => {
+    axios.get.mockRejectedValue(new Error('Network error'));
+
+    const { findByRole } = renderLogin();
+    const retryButton = await findByRole('button', { name: 'Retry' });
+
+    // Click retry and verify it tries to fetch users again
+    axios.get.mockResolvedValueOnce({ data: [] });
+    await fireEvent.click(retryButton);
+    expect(axios.get).toHaveBeenCalledTimes(2);
   });
 });

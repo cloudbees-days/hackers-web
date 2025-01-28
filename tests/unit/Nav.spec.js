@@ -137,19 +137,30 @@ describe("Nav.vue", () => {
     expect(getByText("Show")).toBeTruthy();
   });
 
-  it("shows logout button when user is logged in", () => {
+  it("shows logout button with username when user is logged in", () => {
     store.state.loggedIn = true;
+    store.state.user = { username: 'testuser' };
 
     const { getByText, queryByText } = renderNav();
-    expect(getByText("Log out")).toBeTruthy();
+    expect(getByText("Log out (testuser)")).toBeTruthy();
+    expect(queryByText("Log in")).toBeNull();
+  });
+
+  it("shows logout button without username if user object is missing", () => {
+    store.state.loggedIn = true;
+    store.state.user = null;
+
+    const { getByText, queryByText } = renderNav();
+    expect(getByText("Log out ()")).toBeTruthy();
     expect(queryByText("Log in")).toBeNull();
   });
 
   it("calls logout action when logout button is clicked", async () => {
     store.state.loggedIn = true;
+    store.state.user = { username: 'testuser' };
 
     const { getByText } = renderNav();
-    await fireEvent.click(getByText("Log out"));
+    await fireEvent.click(getByText("Log out (testuser)"));
     expect(actions.logout).toHaveBeenCalled();
   });
 

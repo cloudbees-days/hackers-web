@@ -6,8 +6,9 @@ image:
 hostname: ""  # Application hostname for ingress
 
 config:
-  apiUrl: ""     # HN API URL
+  apiUrl: ""     # API URL
   fmKey: ""      # Feature Management key
+  authUrl: ""    # Auth service URL
 
 ingress:
   className: nginx

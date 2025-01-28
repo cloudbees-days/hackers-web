@@ -27,6 +27,8 @@ spec:
               value: {{ .Values.config.apiUrl | quote }}
             - name: VUE_APP_FM_KEY
               value: {{ .Values.config.fmKey | quote }}
+            - name: VUE_APP_AUTH_URL
+              value: {{ .Values.config.authUrl | quote }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           livenessProbe:

@@ -1,46 +1,36 @@
-export const userList = [
-  {
-    username: 'betauser',
-    password: 'betauser',
-    company: 'acme global',
-    beta_access: true
-  },
-  {
-    username: 'normaluser',
-    password: 'normaluser',
-    company: 'generic co',
-    beta_access: false
-  }
-]
-
 export const betaAccess = () => {
-  if (localStorage.getItem('user') === null) {
+  const userJson = localStorage.getItem('user')
+  if (!userJson) {
     return false
-  } else {
-    let localUser = {}
-    userList.map((user) => {
-      if (user.username === localStorage.getItem('user')) {
-        localUser = user
-      }
-    })
-    return localUser.beta_access
+  }
+  try {
+    const user = JSON.parse(userJson)
+    return user.beta_access || false
+  } catch (error) {
+    console.error('Error parsing user data:', error)
+    return false
   }
 }
 
 export const isLoggedIn = () => {
-  return localStorage.getItem('user') !== null
+  return localStorage.getItem('loggedIn') === 'true'
 }
 
 export const getCompany = () => {
-  if (localStorage.getItem('user') === null) {
-    return false
-  } else {
-    let localUser = {}
-    userList.map((user) => {
-      if (user.username === localStorage.getItem('user')) {
-        localUser = user
-      }
-    })
-    return localUser.company
+  const userJson = localStorage.getItem('user')
+  if (!userJson) {
+    return ''
   }
+  try {
+    const user = JSON.parse(userJson)
+    return user.company || ''
+  } catch (error) {
+    console.error('Error parsing user data:', error)
+    return ''
+  }
+}
+
+// Helper function to get the auth token
+export const getAuthToken = () => {
+  return localStorage.getItem('token')
 }

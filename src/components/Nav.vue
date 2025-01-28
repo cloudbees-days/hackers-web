@@ -26,7 +26,7 @@
       <b-navbar-item tag="div">
         <div class="buttons">
           <a class="button is-black" v-if="loggedIn" @click="logout">
-            Log out
+            Log out ({{ username }})
           </a>
           <a class="button is-black" v-else href="/login">
             Log in
@@ -66,8 +66,14 @@ export default {
       'logout'
     ])
   },
-  computed: mapState([
-    'loggedIn'
-  ])
+  computed: {
+    ...mapState([
+      'loggedIn',
+      'user'
+    ]),
+    username() {
+      return this.user ? this.user.username : ''
+    }
+  }
 }
 </script>
