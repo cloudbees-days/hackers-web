@@ -5,24 +5,35 @@ metadata:
   labels:
     app: {{ .Release.Name }}
 spec:
-  replicas: {{ .Values.replicas }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: {{ .Release.Name }}
   template:
     metadata:
-      name: {{ .Release.Name }}
       labels:
         app: {{ .Release.Name }}
     spec:
       containers:
-        - name: {{ .Release.Name }}
-          image: {{ .Values.image.repository}}:{{.Values.image.tag}}
-          imagePullPolicy: {{.Values.image.pullPolicy}}
-          env:
-            - name: VUE_APP_FM_KEY
-              value: {{ .Values.fmKey }}
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
               protocol: TCP
-      restartPolicy: Always
+          env:
+            - name: VUE_APP_API_URL
+              value: {{ .Values.config.apiUrl | quote }}
+            - name: VUE_APP_FM_KEY
+              value: {{ .Values.config.fmKey | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http 

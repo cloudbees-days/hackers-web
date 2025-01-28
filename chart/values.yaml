@@ -1,10 +1,28 @@
 image:
-  repository: ldonleycb/hackers-organized
-  tag: stable
-  pullPolicy: Always
+  repository: ""  # Docker image repository
+  tag: ""        # Docker image tag
+  pullPolicy: IfNotPresent
 
-hostname: replace-me.example.com
+hostname: ""  # Application hostname for ingress
 
-fmKey: "replace-me"
+config:
+  apiUrl: ""     # HN API URL
+  fmKey: ""      # Feature Management key
 
-replicas: 1
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  tls:
+    enabled: true
+
+resources:
+  limits:
+    cpu: 200m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+replicaCount: 1 
