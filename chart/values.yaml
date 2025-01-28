@@ -10,12 +10,9 @@ config:
   fmKey: ""      # Feature Management key
 
 ingress:
-  enabled: true
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-  tls:
-    enabled: true
 
 resources:
   limits:
