@@ -60,6 +60,7 @@ hostname: your-domain.example.com
 config:
   apiUrl: https://your-api-url
   fmKey: your-feature-management-key
+  authUrl: https://your-api-url
 ```
 
 2. Install the chart:
@@ -77,6 +78,7 @@ helm install hackers-web ./chart -f values.yaml
 | `hostname` | Application hostname for ingress | `""` |
 | `config.apiUrl` | HN API URL | `""` |
 | `config.fmKey` | Feature Management key | `""` |
+| `config.authUrl` | Auth API URL | `""` |
 | `ingress.enabled` | Enable ingress | `true` |
 | `ingress.className` | Ingress class name | `nginx` |
 | `ingress.tls.enabled` | Enable TLS | `true` |
