@@ -37,4 +37,10 @@ Rox.setCustomBooleanProperty("isLoggedIn", isLoggedIn());
 Rox.setCustomStringProperty("company", getCompany());
 
 Rox.register("default", Flags);
-Rox.setup(window.APP_CONFIG.FM_KEY, options);
+
+// Use environment variable in development, runtime config in production
+const fmKey = process.env.NODE_ENV === 'development'
+  ? process.env.VUE_APP_FM_KEY
+  : window.APP_CONFIG.FM_KEY;
+
+Rox.setup(fmKey, options);

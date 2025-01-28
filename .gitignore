@@ -25,3 +25,6 @@ vulnerable-packages.txt
 vulnerable_modules/
 .scannerwork/
 coverage/
+
+public/config.dev.js
+public/index.html.bak

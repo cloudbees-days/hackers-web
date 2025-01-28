@@ -10,7 +10,7 @@
                   :link="post.url"
                   :score="post.score"
                   :user="post.by"
-                  :comment_link="`https://news.ycombinator.com/item?id=${post.id}`"
+                  :comment_link="post.comments_url"
                   :comment_count="post.descendants"
         />
       </div>
@@ -30,17 +30,19 @@ export default {
   },
   async created () {
     try {
-      let response = await axios.get(`https://hacker-news.firebaseio.com/v0/topstories.json`)
-      response.data.slice(0, 20).map(async post => {
-        try {
-          let postData = await axios.get(`https://hacker-news.firebaseio.com/v0/item/${post}.json`)
-          this.posts.push(postData.data)
-        } catch (err) {
-          console.log('Another thing happened', err)
-        }
-      })
+      const apiUrl = process.env.VUE_APP_HN_API_URL || 'https://hn-api.preview.cb-demos.io/api'
+      let response = await axios.get(`${apiUrl}/stories/top`)
+      this.posts = response.data.map(story => ({
+        id: story.id,
+        title: story.title,
+        url: story.url,
+        score: story.points,
+        by: story.submitted_by,
+        descendants: story.comments,
+        comments_url: story.comments_url
+      }))
     } catch (err) {
-      console.log('Something happened', err)
+      console.log('Error fetching stories:', err)
     }
   }
 }

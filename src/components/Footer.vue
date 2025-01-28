@@ -2,7 +2,7 @@
   <footer class="footer" id="footer">
     <div class="content has-text-centered">
       <p>
-        Pulling data from <a href="https://github.com/HackerNews/API"><strong>HackerNews/API</strong></a>.
+        Pulling data from CloudBees Hacker News Mirror API
       </p>
     </div>
   </footer>

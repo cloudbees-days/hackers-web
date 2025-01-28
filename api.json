@@ -64,6 +64,10 @@
         "main.Story": {
             "type": "object",
             "properties": {
+                "comments": {
+                    "type": "integer",
+                    "example": 42
+                },
                 "comments_url": {
                     "type": "string",
                     "example": "https://news.ycombinator.com/item?id=123456"
