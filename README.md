@@ -1,65 +1,103 @@
-# vue-hn-clone
+# Hackers Web Application
 
-This app is a Vue.js-based clone of [Hacker News](https://hn.ycombinator.com).
+A modern web interface for viewing Hacker News content, built with Vue.js and featuring dynamic feature management.
 
-## Objective
+## Local Development
 
-It is helpful to have a go-to app for demoing new tools - this is mine. It's nice to have an app that is more than just a hello world, so I tried to create one that mirrors something usable to some degree.
+### Prerequisites
+- Node.js (v14+)
+- npm or yarn
+- Docker (optional, for container builds)
 
-## Tech info
-
-- [Vue.js](https://vuejs.org/) - The frontend web framework used to build the site
-- [HackerNews/API](https://github.com/HackerNews/API) - Source of data
-- [Bulma](https://bulma.io) (Specifically [Buefy](https://buefy.org)) - the CSS framework I've used
-
-This app is far from an ideal architecture - it is currently all client-side rendered and re-pulls all data on page change.
-In the future I may add [vuex](https://vuex.vuejs.org/) so it doesn't query the API every single page change.
-
-Ideally you would use server-side rendering like [this example](https://github.com/vuejs/vue-hackernews-2.0) does (in fact, that app is all around better).
-But to make testing certain tools easier, being strictly client-side rendered is preferable.
-
-## Deployment requirements
-
-You need to set the `VUE_APP_ROLLOUT_KEY` environment variable to your CloudBees SDK key.
-
-## Project setup
-
+### Configuration
+Create a `.env.local` file in the root directory with the following variables:
 ```
+VUE_APP_API_URL=<your-api-url>
+VUE_APP_FM_KEY=<your-feature-management-key>
+```
+
+### Running Locally
+```bash
+# Install dependencies
 npm install
-```
 
-### Compiles and hot-reloads for development
-
-```
+# Start development server
 npm run serve
-```
 
-### Compiles and minifies for production
+# Run unit tests
+npm run test:unit
 
-```
+# Build for production
 npm run build
 ```
 
-### Run your tests
-
-```
-npm run test
-```
-
-### Lints and fixes files
-
-```
-npm run lint
+### Building the Docker Image
+```bash
+docker build -t your-repo/hackers-web:tag .
 ```
 
-### Run your unit tests
+## Deployment
 
+### Prerequisites
+- Kubernetes cluster
+- Helm 3.x
+- Nginx Ingress Controller
+- cert-manager (for TLS)
+
+### Helm Deployment
+
+The application can be deployed using the included Helm chart. 
+
+1. Update the values file (`values.yaml`) or create a custom one:
+
+```yaml
+image:
+  repository: your-repo/hackers-web
+  tag: your-tag
+
+hostname: your-domain.example.com
+
+config:
+  apiUrl: https://your-api-url
+  fmKey: your-feature-management-key
 ```
-npm run test:unit
+
+2. Install the chart:
+```bash
+helm install hackers-web ./chart -f values.yaml
 ```
 
-### Customize configuration
+### Configuration Options
 
-See [Configuration Reference](https://cli.vuejs.org/config/).
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `image.repository` | Docker image repository | `""` |
+| `image.tag` | Docker image tag | `""` |
+| `image.pullPolicy` | Image pull policy | `IfNotPresent` |
+| `hostname` | Application hostname for ingress | `""` |
+| `config.apiUrl` | HN API URL | `""` |
+| `config.fmKey` | Feature Management key | `""` |
+| `ingress.enabled` | Enable ingress | `true` |
+| `ingress.className` | Ingress class name | `nginx` |
+| `ingress.tls.enabled` | Enable TLS | `true` |
+| `resources.limits.cpu` | CPU limit | `200m` |
+| `resources.limits.memory` | Memory limit | `256Mi` |
+| `resources.requests.cpu` | CPU request | `100m` |
+| `resources.requests.memory` | Memory request | `128Mi` |
+| `replicaCount` | Number of replicas | `1` |
 
+### TLS Configuration
 
+The chart is configured to use Let's Encrypt for TLS certificates. It assumes:
+- cert-manager is installed in the cluster
+- The `letsencrypt-prod` ClusterIssuer is configured
+
+### Health Checks
+
+The deployment includes:
+- Liveness probe at `/`
+- Readiness probe at `/`
+
+## Feature Management
+
+The application uses feature flags to control various functionality. These are managed through the Feature Management service configured via `VUE_APP_FM_KEY`.
