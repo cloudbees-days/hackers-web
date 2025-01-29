@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - "**"
-
+  workflow_dispatch:
 jobs:
   test:
     outputs:
@@ -41,5 +41,3 @@ jobs:
       registryUsername: ${{ secrets.dockerhub_user }}
       registryToken: ${{ secrets.dockerhub_token }}
     needs: test
-
- 
