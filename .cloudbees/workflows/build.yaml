@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - "**"
-  workflow_dispatch:
+
 jobs:
   test:
     outputs:
@@ -34,10 +34,44 @@ jobs:
             ${{ steps.RunUnitTest.outputs.CODE_COVERAGE }}
           format: MARKDOWN
   build:
-    uses: cloudbees-days/workflows/build-and-push.yaml
-    with:
-      imageName: ${{ secrets.dockerhub_user }}/hackers-web
-      imageTag: ${{ cloudbees.scm.sha }}
-      registryUsername: ${{ secrets.dockerhub_user }}
-      registryToken: ${{ secrets.dockerhub_token }}
+    steps:
+      - uses: cloudbees-io/checkout@v1
+        name: Get source code
+        kind: build
+        continue-on-error: true
+      - uses: cloudbees-io/configure-oci-credentials@v1
+        name: Configure container registry credentials
+        continue-on-error: true
+        id: dockerconfig
+        with:
+          registry: https://index.docker.io/v1/
+          username: ${{ secrets.dockerhub_user }}
+          password: ${{ secrets.dockerhub_token }}
+      - uses: cloudbees-io/kaniko@v1
+        name: Build container image
+        kind: build
+        with:
+          destination: ${{ secrets.dockerhub_user }}/hackers-web:${{ cloudbees.scm.sha }},${{ secrets.dockerhub_user }}/hackers-web:latest
+          tar-path: container-image.tar
+          build-args: BUILDKIT_CONTEXT_KEEP_GIT_DIR=1,BUILDKIT_INLINE_CACHE=1
+      - uses: calculi-corp/assets-plugin-chain-utils/upload-binary@v1
+        name: Upload binary from container build
+        continue-on-error: true
+        id: upload-binary
+        with:
+          file-path: container-image.tar
+          file-type: BINARY_CONTAINER
+          debug: "true"
+      - name: Publish evidence
+        uses: cloudbees-io/publish-evidence-item@v1
+        with:
+          content: |-
+            ## Built and pushed image to docker hub
+            
+            [Docker Hub](https://hub.docker.com/repository/docker/${{ secrets.dockerhub_user }}/hackers-web/tags)
+            
+            Deployed hackers-web:${{ cloudbees.scm.sha }}
+          format: MARKDOWN
     needs: test
+
+ 
