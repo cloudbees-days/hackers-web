@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - "**"
-
+  workflow_dispatch:
 jobs:
   test:
     outputs:
@@ -67,11 +67,9 @@ jobs:
         with:
           content: |-
             ## Built and pushed image to docker hub
-            
+
             [Docker Hub](https://hub.docker.com/repository/docker/${{ secrets.dockerhub_user }}/hackers-web/tags)
-            
+
             Deployed hackers-web:${{ cloudbees.scm.sha }}
           format: MARKDOWN
     needs: test
-
- 
