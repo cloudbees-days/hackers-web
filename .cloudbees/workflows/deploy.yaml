@@ -22,7 +22,7 @@ jobs:
         with:
           chart-location: ${{ cloudbees.workspace }}/chart
           release-name: ${{ env.APP_NAME }}
-          namespace: ${{ env.NAMESPACE }}-dev
+          namespace: ${{ env.NAMESPACE }}
           values: |
             image:
               repository: ${{ secrets.DOCKERHUB_USER }}/hackers-web
