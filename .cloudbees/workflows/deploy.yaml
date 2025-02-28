@@ -26,8 +26,11 @@ jobs:
             image:
               repository: ${{ secrets.DOCKERHUB_USER }}/hackers-web
               tag: ${{ cloudbees.scm.sha }}
-            fmKey: ${{ secrets.FM_TOKEN }}
             hostname: microhacker.preview.cb-demos.io
+            config:
+              fmKey: ${{ secrets.FM_TOKEN }}
+              apiUrl: https://microhacker-api.preview.cb-demos.io/api
+              authUrl: https://microhacker-auth.preview.cb-demos.io
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
