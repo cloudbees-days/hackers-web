@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 env:
   NAMESPACE: microhacker
+  APP_NAME: microhacker-web
 jobs:
   deploy:
     environment: micro-hacker
