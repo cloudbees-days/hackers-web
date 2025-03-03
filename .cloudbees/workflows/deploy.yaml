@@ -26,7 +26,7 @@ jobs:
           values: |
             image:
               repository: ${{ secrets.DOCKERHUB_USER }}/hackers-web
-              tag: ${{ cloudbees.scm.sha }}
+              tag: latest
             hostname: microhacker.preview.cb-demos.io
             config:
               fmKey: ${{ secrets.FM_TOKEN }}
@@ -39,5 +39,5 @@ jobs:
             ## Deployed environment
             [Dev frontend](https://microhacker.preview.cb-demos.io/)
 
-            Running hackers-web:${{ cloudbees.scm.sha }}
+            Running hackers-web:latest
           format: MARKDOWN
