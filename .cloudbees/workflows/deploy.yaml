@@ -38,7 +38,7 @@ jobs:
           name: ${{ env.APP_NAME }}
           version: latest
           url: "docker.io/${{ secrets.DOCKERHUB_USER }}/hackers-web"
-          target-environment: ${{ env.NAMESPACE }}
+          target-environment: micro-hacker
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
