@@ -72,6 +72,7 @@ jobs:
           name: ${{ secrets.DOCKERHUB_USER }}/hackers-web
           version: ${{ inputs.artifactVersion }}
           url: "${{ secrets.DOCKERHUB_USER }}/hackers-web:${{ inputs.artifactVersion }}"
+          digest: ${{ inputs.digest }}
           target-environment: micro-hacker
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
