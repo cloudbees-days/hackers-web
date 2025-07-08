@@ -36,7 +36,8 @@ on:
         type: string
         required: false
 env:
-  NAMESPACE: microhacker
+  #NAMESPACE: microhacker
+  NAMESPACE: ${{ secrets.namespace }}
   APP_NAME: microhacker-web
 jobs:
   deploy:
