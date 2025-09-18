@@ -62,6 +62,7 @@ jobs:
           file-path: container-image.tar
           file-type: BINARY_CONTAINER
           debug: "true"
+          alias: ${{ secrets.DOCKERHUB_USER }}/hackers-web:1.0-${{ cloudbees.version }}
       - name: Publish evidence
         uses: cloudbees-io/publish-evidence-item@v1
         with:
